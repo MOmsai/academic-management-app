@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Department & HOD</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Global Styles */
+        :root {
+            --primary: #4361ee;
+            --primary-dark: #3049c9;
+            --secondary: #3a0ca3;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --danger: #e5383b;
+            --success: #06d6a0;
+            --warning: #ffd166;
+            --info: #118ab2;
+            --gray: #6c757d;
+            --gray-light: #e9ecef;
+            --border-radius: 8px;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Poppins', 'Segoe UI', sans-serif;
+            background-color: #f0f2f5;
+            color: var(--dark);
+            line-height: 1.6;
+            padding: 2rem;
+        }
+
+        /* Content Section */
+        .content-section {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            transition: var(--transition);
+        }
+
+        .content-section:hover {
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        }
+
+        h2 {
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+        }
+
+        h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--dark);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--gray-light);
+            border-radius: var(--border-radius);
+            font-size: 0.95rem;
+            transition: var(--transition);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(67, 97, 238, 0.15);
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.75rem 1.5rem;
+            font-size: 0.95rem;
+            font-weight: 500;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+            width: 100%;
+        }
+
+        .btn i {
+            margin-right: 0.5rem;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 576px) {
+            body {
+                padding: 1rem;
+            }
+
+            .content-section {
+                padding: 1.5rem;
+            }
+
+            h2 {
+                font-size: 1.5rem;
+            }
+
+            h3 {
+                font-size: 1.1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Create Department & HOD Section -->
+    <div id="create-dept-hod" class="content-section">
+        <h2>Create New Department & HOD</h2>
+        <form method="post" action="/api/depreg">
+            <div class="section-header">
+                <h3>Department Details</h3>
+            </div>
+            <div class="form-group">
+                <label for="deptName">Department Name</label>
+                <input type="text" id="deptName" name="deptName" class="form-control" placeholder="Enter department name" required>
+            </div>
+            <div class="form-group">
+                <label for="deptId">Department ID</label>
+                <input type="text" id="deptId" name="deptId" class="form-control" placeholder="Enter department ID" required>
+            </div>
+            
+            <div class="section-header">
+                <h3>HOD Details</h3>
+            </div>
+            <div class="form-group">
+                <label for="hodName">HOD Full Name</label>
+                <input type="text" id="hodName" name="hodName" class="form-control" placeholder="Enter HOD's full name" required>
+            </div>
+            <div class="form-group">
+                <label for="hodId">HOD ID</label>
+                <input type="text" id="hodId" name="hodId" class="form-control" placeholder="Enter HOD ID" required>
+            </div>
+            <div class="form-group">
+                <label for="hodEmail">HOD Email</label>
+                <input type="email" id="hodEmail" name="hodEmail" class="form-control" placeholder="Enter HOD's email" required>
+            </div>
+            <div class="form-group">
+                <label for="hodPassword">HOD Temporary Password</label>
+                <input type="password" id="hodPassword" name="hodPassword" class="form-control" placeholder="Enter temporary password" required>
+            </div>
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary">Create Department & HOD</button>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

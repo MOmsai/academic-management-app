@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Faculty Dashboard</title>
+    <style>
+        /* [Existing CSS remains unchanged] */
+        /* Add styling for subjects list */
+        /* Base & Reset Styles */
+        :root {
+            --primary-color: #007bff;
+            --primary-dark: #0056b3;
+            --success-color: #28a745;
+            --success-dark: #218838;
+            --light-bg: #f4f4f4;
+            --white: #ffffff;
+            --border-color: #ddd;
+            --text-color: #333;
+            --section-bg: #f8f9fa;
+            --box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: var(--light-bg);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+        
+        /* Layout Components */
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        .sidebar {
+            width: 250px;
+            background: var(--primary-color);
+            color: var(--white);
+            padding: 20px;
+            position: fixed;
+            height: 100%;
+        }
+        
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+            flex-grow: 1;
+        }
+        
+        /* Sidebar Components */
+        .sidebar h2 {
+            margin: 0 0 30px;
+            text-align: center;
+        }
+        
+        .sidebar a {
+            color: var(--white);
+            text-decoration: none;
+            display: block;
+            padding: 12px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+        
+        .sidebar a:hover,
+        .sidebar a.active {
+            background: var(--primary-dark);
+        }
+        
+        /* Main Content Components */
+        .header {
+            text-align: center;
+            padding: 20px;
+            background: var(--primary-color);
+            color: var(--white);
+            border-radius: 8px 8px 0 0;
+            margin-bottom: 20px;
+        }
+        
+        .content-section {
+            background: var(--white);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: var(--box-shadow);
+            margin-bottom: 20px;
+        }
+        
+        .content-section h2 {
+            margin-bottom: 15px;
+        }
+        
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+        }
+        
+        /* Button Styles */
+        button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-right: 10px;
+        }
+        
+        .btn-primary {
+            background: var(--primary-color);
+            color: var(--white);
+        }
+        
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+        
+        .btn-export {
+            background: var(--success-color);
+            color: var(--white);
+        }
+        
+        .btn-export:hover {
+            background: var(--success-dark);
+        }
+        
+        /* Table Styles */
+        .table-container {
+            overflow-x: auto;
+            margin-bottom: 20px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border: 1px solid var(--border-color);
+        }
+        
+        th {
+            background: var(--primary-color);
+            color: var(--white);
+        }
+        
+        /* Analytics Section */
+        .analytics-section {
+            margin-top: 20px;
+            padding: 15px;
+            background: var(--section-bg);
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        
+        .analytics-section h3 {
+            margin-bottom: 10px;
+        }
+        
+        .analytics-section p {
+            margin: 5px 0;
+        }
+        
+        /* Media Queries */
+        @media (max-width: 768px) {
+            .dashboard-container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                position: static;
+                height: auto;
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+        }
+        #subjectsList {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .subject-item {
+            background: var(--white);
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            box-shadow: var(--box-shadow);
+            flex: 1 1 200px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="sidebar">
+            <h2>Faculty Dashboard</h2>
+            <a href="#marks" class="active">Enter Marks</a>
+            <a href="/">Logout</a>
+        </div>
+        <div class="main-content">
+            <div class="header">Faculty Dashboard</div>
+            <div class="content-section" id="marks">
+                <h2>Enter Marks</h2>
+                <div class="form-group">
+                    <label for="subjectSelect">Select Subject</label>
+                    <select id="subjectSelect" onchange="loadStudents()">
+                        <option value="">Select Subject</option>
+                    </select>
+                </div>
+                <div class="table-container">
+                    <table id="studentsTable">
+                        <thead>
+                            <tr>
+                                <th>Roll Number</th>
+                                <th>Full Name</th>
+                                <th>Assignment 1</th>
+                                <th>Assignment 2</th>
+                                <th>Assignment 3</th>
+                                <th>Total Marks</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                <div class="analytics-section" id="analyticsSection">
+                    <h3>Analytics</h3>
+                    <p id="topperInfo">Topper: N/A</p>
+                    <p id="avgAssignment1">Average Assignment 1: N/A</p>
+                    <p id="avgAssignment2">Average Assignment 2: N/A</p>
+                    <p id="avgAssignment3">Average Assignment 3: N/A</p>
+                </div>
+                <button id="send-email-btn" class="btn-primary" onclick="sendEmails()">Send Emails to Students</button>
+                <button id="export-marks-btn" class="btn-export" onclick="exportMarks()">Export Marks</button>
+            </div>
+            <div class="content-section" id="subjects">
+                <h2>My Subjects</h2>
+                <div id="subjectsList"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentSubjectId = null;
+
+        function loadSubjects() {
+            fetch('/api/faculty-subjects')
+                .then(response => response.json())
+                .then(subjects => {
+                    // Populate dropdown
+                    const select = document.getElementById('subjectSelect');
+                    subjects.forEach(subject => {
+                        const option = document.createElement('option');
+                        option.value = subject.subject_id;
+                        option.textContent = subject.subject_name;
+                        select.appendChild(option);
+                    });
+
+                    // Populate My Subjects section
+                    const subjectsList = document.getElementById('subjectsList');
+                    subjectsList.innerHTML = ''; // Clear existing content
+                    if (subjects.length === 0) {
+                        subjectsList.innerHTML = '<p>No subjects assigned.</p>';
+                    } else {
+                        subjects.forEach(subject => {
+                            const subjectItem = document.createElement('div');
+                            subjectItem.className = 'subject-item';
+                            subjectItem.innerHTML = `
+                                <strong>${subject.subject_name}</strong><br>
+                                Subject ID: ${subject.subject_id}
+                            `;
+                            subjectsList.appendChild(subjectItem);
+                        });
+                    }
+                })
+                .catch(err => console.error('Error loading subjects:', err));
+        }
+
+        function loadStudents() {
+            currentSubjectId = document.getElementById('subjectSelect').value;
+            if (!currentSubjectId) {
+                document.getElementById('studentsTable').querySelector('tbody').innerHTML = '';
+                document.getElementById('topperInfo').textContent = 'Topper: N/A';
+                document.getElementById('avgAssignment1').textContent = 'Average Assignment 1: N/A';
+                document.getElementById('avgAssignment2').textContent = 'Average Assignment 2: N/A';
+                document.getElementById('avgAssignment3').textContent = 'Average Assignment 3: N/A';
+                return;
+            }
+
+            fetch(`/api/subject-students?subject_id=${currentSubjectId}`)
+                .then(response => response.json())
+                .then(students => {
+                    const tbody = document.getElementById('studentsTable').querySelector('tbody');
+                    tbody.innerHTML = '';
+                    students.forEach(student => {
+                        const totalMarks = (parseFloat(student.marks['Assignment 1']) || 0) +
+                                          (parseFloat(student.marks['Assignment 2']) || 0) +
+                                          (parseFloat(student.marks['Assignment 3']) || 0);
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${student.roll_number}</td>
+                            <td>${student.full_name}</td>
+                            <td><input type="number" min="0" max="40" value="${student.marks['Assignment 1'] || ''}" onchange="validateMark(this, 'Assignment 1', 40)"></td>
+                            <td><input type="number" min="0" max="40" value="${student.marks['Assignment 2'] || ''}" onchange="validateMark(this, 'Assignment 2', 40)"></td>
+                            <td><input type="number" min="0" max="40" value="${student.marks['Assignment 3'] || ''}" onchange="validateMark(this, 'Assignment 3', 40)"></td>
+                            <td>${totalMarks || 'N/A'}</td>
+                            <td><button onclick="saveMarks('${student.roll_number}')">Save</button></td>
+                        `;
+                        tbody.appendChild(row);
+                    });
+
+                    fetch(`/api/subject-analytics?subject_id=${currentSubjectId}`)
+                        .then(response => response.json())
+                        .then(analytics => {
+                            document.getElementById('topperInfo').textContent = `Topper: ${analytics.topper ? `${analytics.topper.full_name} (${analytics.topper.totalMarks})` : 'N/A'}`;
+                            document.getElementById('avgAssignment1').textContent = `Average Assignment 1: ${analytics.avgAssignment1 ? analytics.avgAssignment1.toFixed(2) : 'N/A'}`;
+                            document.getElementById('avgAssignment2').textContent = `Average Assignment 2: ${analytics.avgAssignment2 ? analytics.avgAssignment2.toFixed(2) : 'N/A'}`;
+                            document.getElementById('avgAssignment3').textContent = `Average Assignment 3: ${analytics.avgAssignment3 ? analytics.avgAssignment3.toFixed(2) : 'N/A'}`;
+                        })
+                        .catch(err => console.error('Error loading analytics:', err));
+                })
+                .catch(err => console.error('Error loading students:', err));
+        }
+
+        function validateMark(input, assessmentType, max) {
+            let value = parseFloat(input.value);
+            if (isNaN(value) || value < 0) {
+                input.value = '';
+                alert(`${assessmentType} mark must be at least 0.`);
+            } else if (value > max) {
+                input.value = max;
+                alert(`${assessmentType} mark cannot exceed ${max}.`);
+            }
+        }
+
+        function saveMarks(rollNumber) {
+            const row = Array.from(document.querySelectorAll('#studentsTable tbody tr'))
+                .find(r => r.cells[0].textContent === rollNumber);
+            const marks = {
+                'Assignment 1': row.cells[2].querySelector('input').value,
+                'Assignment 2': row.cells[3].querySelector('input').value,
+                'Assignment 3': row.cells[4].querySelector('input').value
+            };
+
+            const totalMarks = (parseFloat(marks['Assignment 1']) || 0) +
+                              (parseFloat(marks['Assignment 2']) || 0) +
+                              (parseFloat(marks['Assignment 3']) || 0);
+            if (totalMarks > 40) {
+                alert(`Total marks (${totalMarks}) exceed the limit of 40. Please adjust the values.`);
+                return;
+            }
+
+            fetch('/api/save-marks', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ roll_number: rollNumber, subject_id: currentSubjectId, marks })
+            }).then(response => {
+                if (response.ok) {
+                    alert('Marks saved successfully');
+                    loadStudents();
+                } else {
+                    response.json().then(data => alert(`Failed to save marks: ${data.error}`));
+                }
+            }).catch(err => console.error('Error saving marks:', err));
+        }
+
+        function sendEmails() {
+    const sendButton = document.getElementById('send-email-btn');
+    if (!currentSubjectId) {
+        alert('Please select a subject first');
+        return;
+    }
+    sendButton.disabled = true;
+    fetch(`/api/send-marks-email?subject_id=${currentSubjectId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+    }).then(response => {
+        if (response.ok) {
+            alert('Emails sent successfully');
+        } else {
+            response.json().then(data => alert(`Failed to send emails: ${data.error}`));
+        }
+        sendButton.disabled = false;
+    }).catch(err => {
+        console.error('Error sending emails:', err);
+        alert('Error sending emails. If the daily limit was exceeded, try again after 24 hours.');
+        sendButton.disabled = false;
+    });
+}
+        function exportMarks() {
+            if (!currentSubjectId) {
+                alert('Please select a subject first');
+                return;
+            }
+            const subjectName = document.getElementById('subjectSelect').selectedOptions[0].text;
+            fetch(`/api/export-marks?subject_id=${currentSubjectId}`)
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(data => { throw new Error(data.error); });
+                    }
+                    return response.blob();
+                })
+                .then(blob => {
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `${subjectName}_marks.csv`;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    window.URL.revokeObjectURL(url);
+                })
+                .catch(err => {
+                    console.error('Error exporting marks:', err);
+                    alert(`Failed to export marks: ${err.message}`);
+                });
+        }
+
+        window.onload = function() {
+            loadSubjects(); // Load subjects for both dropdown and My Subjects section
+            fetch('/api/faculty-details')
+                .then(response => response.json())
+                .then(data => {
+                    document.querySelector('.header').innerHTML = `
+                        Welcome, ${data.full_name}<br>
+                        Department: ${data.dept_name}
+                    `;
+                })
+                .catch(err => console.error('Error loading faculty details:', err));
+        };
+    </script>
+</body>
+</html>

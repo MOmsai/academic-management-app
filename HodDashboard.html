@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HOD Dashboard - Internal Marks Management System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f4f4f4; color: #333; }
+        .dashboard-container { display: flex; min-height: 100vh; }
+        .sidebar { width: 250px; background: #007bff; color: white; padding: 20px; position: fixed; height: 100%; }
+        .brand { display: flex; align-items: center; margin-bottom: 30px; }
+        .brand i { font-size: 24px; margin-right: 10px; }
+        .brand h2 { margin: 0; font-size: 20px; }
+        .sidebar-menu { display: flex; flex-direction: column; gap: 10px; }
+        .sidebar-link { display: flex; align-items: center; padding: 12px; color: white; text-decoration: none; border-radius: 5px; transition: background 0.3s; }
+        .sidebar-link i { margin-right: 10px; }
+        .sidebar-link:hover, .sidebar-link.active { background: #0056b3; }
+        .main-content { margin-left: 250px; padding: 20px; flex-grow: 1; }
+        .header-section { background: #007bff; color: white; padding: 20px; border-radius: 8px 8px 0 0; text-align: center; }
+        .header-title { margin: 0; font-size: 28px; }
+        .header-subtitle { margin: 5px 0 0; font-size: 16px; }
+        .content-section { background: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0 0 5px rgba(0, 0, 0, 0.1); margin-bottom: 20px; display: none; }
+        .content-section.active { display: block; }
+        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .section-title { margin: 0; font-size: 22px; }
+        .form-row { display: flex; gap: 20px; margin-bottom: 20px; }
+        .form-group { flex: 1; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        .form-control { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
+        .table-container { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 12px; text-align: left; border: 1px solid #ddd; }
+        th { background: #007bff; color: white; }
+        .btn { padding: 8px 12px; border: none; border-radius: 5px; cursor: pointer; transition: background 0.3s; margin-right: 5px; }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-primary:hover { background: #0056b3; }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-danger:hover { background: #c82333; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-success:hover { background: #218838; }
+        .btn-sm { padding: 5px 10px; font-size: 14px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
+        .stat-card { background: #f8f9fa; padding: 20px; border-radius: 8px; text-align: center; position: relative; }
+        .stat-card h3 { margin: 0 0 10px; font-size: 18px; }
+        .stat-card p { margin: 0; font-size: 24px; font-weight: bold; }
+        .stat-card i { position: absolute; top: 20px; right: 20px; font-size: 24px; color: #007bff; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); justify-content: center; align-items: center; }
+        .modal-content { background: white; padding: 20px; border-radius: 8px; width: 500px; max-width: 90%; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .modal-title { margin: 0; font-size: 20px; }
+        .modal-body { margin-bottom: 20px; }
+        .modal-footer { display: flex; justify-content: flex-end; gap: 10px; }
+        @media (max-width: 768px) {
+            .dashboard-container { flex-direction: column; }
+            .sidebar { width: 100%; position: static; height: auto; }
+            .main-content { margin-left: 0; }
+            .form-row { flex-direction: column; gap: 10px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="brand">
+                <i class="fas fa-university"></i>
+                <h2>HOD Dashboard</h2>
+            </div>
+            <div class="sidebar-menu">
+                <a href="#subjects" class="sidebar-link active" data-section="subjects">
+                    <i class="fas fa-book"></i>
+                    <span>Subjects</span>
+                </a>
+                <a href="#students" class="sidebar-link" data-section="students">
+                    <i class="fas fa-users"></i>
+                    <span>Students</span>
+                </a>
+                <a href="#marks" class="sidebar-link" data-section="marks">
+                    <i class="fas fa-clipboard-list"></i>
+                    <span>View Marks</span>
+                </a>
+                <a href="#stats" class="sidebar-link" data-section="stats">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>Statistics</span>
+                </a>
+                <a href="#" class="sidebar-link" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="header-section">
+                <h1 class="header-title">Welcome, <span id="hod-name">[HOD Name]</span></h1>
+                <p class="header-subtitle">Department: <span id="dept-name">[Department Name]</span></p>
+            </div>
+
+            <!-- Subjects Section -->
+            <div id="subjects" class="content-section active">
+                <div class="section-header">
+                    <h2 class="section-title">Manage Subjects</h2>
+                    <button class="btn btn-primary" onclick="openModal('subject-modal')">
+                        <i class="fas fa-plus"></i> Add Subject
+                    </button>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="filter-semester">
+                            <i class="fas fa-filter"></i> Filter by Semester
+                        </label>
+                        <select id="filter-semester" class="form-control" onchange="filterSubjects()">
+                            <option value="">All Semesters</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                            <option value="6">6</option>
+                            <option value="7">7</option>
+                            <option value="8">8</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Subject ID</th>
+                                <th>Subject Name</th>
+                                <th>Semester</th>
+                                <th>Assigned Faculty</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="subjects-table-body">
+                            <!-- Populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Students Section -->
+            <div id="students" class="content-section">
+                <div class="section-header">
+                    <h2 class="section-title">Manage Students</h2>
+                    <button class="btn btn-primary" onclick="openModal('student-modal')">
+                        <i class="fas fa-plus"></i> Add Student
+                    </button>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="filter-student-semester">
+                            <i class="fas fa-filter"></i> Filter by Semester
+                        </label>
+                        <select id="filter-student-semester" class="form-control" onchange="filterStudents()">
+                            <option value="">All Semesters</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                            <option value="6">6</option>
+                            <option value="7">7</option>
+                            <option value="8">8</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Roll Number</th>
+                                <th>Full Name</th>
+                                <th>Email</th>
+                                <th>Semester</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="students-table-body">
+                            <!-- Populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- View Marks Section -->
+            <div id="marks" class="content-section">
+                <div class="section-header">
+                    <h2 class="section-title">View Marks</h2>
+                    <button class="btn btn-success" onclick="exportMarksToCSV()">
+                        <i class="fas fa-download"></i> Export to CSV
+                    </button>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="filter-marks-semester">
+                            <i class="fas fa-filter"></i> Filter by Semester
+                        </label>
+                        <select id="filter-marks-semester" class="form-control" onchange="updateMarksFilters()">
+                            <option value="">Select Semester</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                            <option value="6">6</option>
+                            <option value="7">7</option>
+                            <option value="8">8</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="filter-marks-subject">
+                            <i class="fas fa-filter"></i> Filter by Subject
+                        </label>
+                        <select id="filter-marks-subject" class="form-control" onchange="updateMarksFilters()">
+                            <option value="">Select Subject</option>
+                            <!-- Populated by JavaScript -->
+                        </select>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Roll Number</th>
+                                <th>Full Name</th>
+                                <th>Subject Name</th>
+                                <th>Assessment 1</th>
+                                <th>Assessment 2</th>
+                                <th>Assignment 3</th>
+                                <th>Total Marks</th>
+                            </tr>
+                        </thead>
+                        <tbody id="marks-table-body">
+                            <!-- Populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Statistics Section -->
+            <div id="stats" class="content-section">
+                <div class="section-header">
+                    <h2 class="section-title">Department Statistics</h2>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>Total Subjects</h3>
+                        <p id="total-subjects">0</p>
+                        <i class="fas fa-book"></i>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Subjects per Semester</h3>
+                        <p id="subjects-per-semester">[Data]</p>
+                        <i class="fas fa-layer-group"></i>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Faculty Assignments</h3>
+                        <p id="faculty-assignments">0</p>
+                        <i class="fas fa-user-tie"></i>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Total Students</h3>
+                        <p id="total-students">0</p>
+                        <i class="fas fa-users"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Subject Modal -->
+    <div id="subject-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="subject-modal-title">Add New Subject</h3>
+            </div>
+            <form id="subject-form">
+                <div class="modal-body">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="subject-id">Subject ID</label>
+                            <input type="text" id="subject-id" name="subjectId" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="subject-name">Subject Name</label>
+                            <input type="text" id="subject-name" name="subjectName" class="form-control" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="subject-dept-id">Department</label>
+                            <select id="subject-dept-id" name="deptId" class="form-control" required disabled>
+                                <!-- Populated dynamically with HOD's department -->
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="subject-semester">Semester</label>
+                            <select id="subject-semester" name="semester" class="form-control" required>
+                                <option value="">Select Semester</option>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                                <option value="6">6</option>
+                                <option value="7">7</option>
+                                <option value="8">8</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="subject-course">Course</label>
+                            <select id="subject-course" name="course" class="form-control" required disabled>
+                                <option value="B.Tech">B.Tech</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="subject-faculty-id">Assign Faculty</label>
+                        <select id="subject-faculty-id" name="facultyId" class="form-control">
+                            <option value="">Select Faculty</option>
+                            <!-- Populated by JavaScript -->
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" onclick="closeModal('subject-modal')">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Save
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add/Edit Student Modal -->
+    <div id="student-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="student-modal-title">Add New Student</h3>
+            </div>
+            <form id="student-form">
+                <div class="modal-body">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="student-roll-number">Roll Number</label>
+                            <input type="text" id="student-roll-number" name="rollNumber" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="student-full-name">Full Name</label>
+                            <input type="text" id="student-full-name" name="fullName" class="form-control" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="student-email">Email</label>
+                            <input type="email" id="student-email" name="email" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="student-password">Password</label>
+                            <input type="password" id="student-password" name="password" class="form-control" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="student-dept-id">Department</label>
+                            <select id="student-dept-id" name="deptId" class="form-control" required disabled>
+                                <!-- Populated dynamically with HOD's department -->
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="student-semester">Semester</label>
+                            <select id="student-semester" name="semester" class="form-control" required>
+                                <option value="">Select Semester</option>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                                <option value="6">6</option>
+                                <option value="7">7</option>
+                                <option value="8">8</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="student-course">Course</label>
+                            <select id="student-course" name="course" class="form-control" required disabled>
+                                <option value="B.Tech">B.Tech</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" onclick="closeModal('student-modal')">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Save
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let hodDeptId = null;
+        let subjects = [];
+        let students = [];
+        let faculty = [];
+        const defaultCourse = "B.Tech"; // Default course set to B.Tech
+
+        // Sidebar Navigation
+        document.querySelectorAll('.sidebar-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const sectionId = this.getAttribute('data-section');
+                if (!sectionId) return; // For logout link
+                document.querySelectorAll('.content-section').forEach(section => {
+                    section.classList.remove('active');
+                });
+                document.getElementById(sectionId).classList.add('active');
+                document.querySelectorAll('.sidebar-link').forEach(a => {
+                    a.classList.remove('active');
+                });
+                this.classList.add('active');
+            });
+        });
+
+        // Modal Functions
+        function openModal(modalId) {
+            document.getElementById(modalId).style.display = 'flex';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+            if (modalId === 'subject-modal') {
+                document.getElementById('subject-form').reset();
+                document.getElementById('subject-modal-title').textContent = 'Add New Subject';
+                document.getElementById('subject-id').removeAttribute('readonly');
+            } else if (modalId === 'student-modal') {
+                document.getElementById('student-form').reset();
+                document.getElementById('student-modal-title').textContent = 'Add New Student';
+                document.getElementById('student-roll-number').removeAttribute('readonly');
+            }
+        }
+
+        // Logout
+        function logout() {
+            fetch('/api/logout', { method: 'POST' })
+                .then(res => {
+                    if (res.ok) {
+                        alert('Logged out successfully!');
+                        window.location.href = '/';
+                    } else {
+                        throw new Error('Logout failed');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error logging out:', error);
+                    alert('Failed to log out.');
+                });
+        }
+
+        // Fetch HOD Details
+        async function loadHODDetails() {
+            try {
+                const response = await fetch('/api/hod-details');
+                if (!response.ok) throw new Error('Unauthorized');
+                const data = await response.json();
+                hodDeptId = data.dept_id;
+                console.log('HOD Details:', data);
+                document.getElementById('hod-name').textContent = data.hod_name;
+                document.getElementById('dept-name').textContent = data.dept_name;
+                const deptSelect = document.getElementById('subject-dept-id');
+                const studentDeptSelect = document.getElementById('student-dept-id');
+                deptSelect.innerHTML = `<option value="${hodDeptId}">${data.dept_name} (${hodDeptId})</option>`;
+                studentDeptSelect.innerHTML = `<option value="${hodDeptId}">${data.dept_name} (${hodDeptId})</option>`;
+                // Load other data after HOD details are set
+                await Promise.all([
+                    loadSubjects(),
+                    loadFaculty(),
+                    loadStudents(),
+                    loadStats()
+                ]);
+            } catch (err) {
+                console.error('Error fetching HOD details:', err);
+                alert('Failed to load HOD details. Redirecting to login.');
+                window.location.href = '/login.html';
+            }
+        }
+
+        // Load Subjects
+        async function loadSubjects() {
+            try {
+                const response = await fetch(`/api/subjects?deptId=${hodDeptId}&course=${defaultCourse}`);
+                if (!response.ok) throw new Error('Failed to fetch subjects');
+                subjects = await response.json();
+                console.log('Loaded Subjects:', subjects);
+                filterSubjects();
+            } catch (error) {
+                console.error('Error loading subjects:', error);
+                alert('Failed to load subjects.');
+            }
+        }
+
+        // Filter Subjects
+        function filterSubjects() {
+            const semester = document.getElementById('filter-semester').value;
+            const tbody = document.getElementById('subjects-table-body');
+            tbody.innerHTML = '';
+
+            console.log('Filtering Subjects with semester:', semester);
+            const filtered = subjects.filter(subject => {
+                const matchesDept = subject.dept_id === hodDeptId;
+                const matchesCourse = subject.course === defaultCourse;
+                const matchesSemester = !semester || subject.semester.toString() === semester;
+                console.log(`Subject: ${subject.subject_id}, Matches Dept: ${matchesDept}, Matches Course: ${matchesCourse}, Matches Semester: ${matchesSemester}`);
+                return matchesDept && matchesCourse && matchesSemester;
+            });
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">No subjects found.</td></tr>';
+                return;
+            }
+
+            filtered.forEach(subject => {
+                const row = `<tr>
+                    <td>${subject.subject_id}</td>
+                    <td>${subject.subject_name}</td>
+                    <td>${subject.semester}</td>
+                    <td>${subject.assigned_faculty || 'Not Assigned'}</td>
+                    <td class="action-buttons">
+                        <button class="btn btn-primary btn-sm" onclick="editSubject('${subject.subject_id}')"><i class="fas fa-edit"></i> Edit</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteSubject('${subject.subject_id}')"><i class="fas fa-trash"></i> Delete</button>
+                    </td>
+                </tr>`;
+                tbody.innerHTML += row;
+            });
+        }
+
+        // Edit Subject
+        function editSubject(subjectId) {
+            const subject = subjects.find(s => s.subject_id === subjectId);
+            if (!subject) return;
+            document.getElementById('subject-modal-title').textContent = 'Edit Subject';
+            document.getElementById('subject-id').value = subject.subject_id;
+            document.getElementById('subject-id').setAttribute('readonly', 'readonly');
+            document.getElementById('subject-name').value = subject.subject_name;
+            document.getElementById('subject-dept-id').value = subject.dept_id;
+            document.getElementById('subject-semester').value = subject.semester;
+            document.getElementById('subject-course').value = subject.course;
+            document.getElementById('subject-faculty-id').value = subject.assigned_faculty || '';
+            openModal('subject-modal');
+        }
+
+        // Delete Subject
+        async function deleteSubject(subjectId) {
+            if (confirm(`Are you sure you want to delete subject ${subjectId}?`)) {
+                try {
+                    const response = await fetch(`/api/delete-subject?subject_id=${subjectId}`, { method: 'DELETE' });
+                    if (response.ok) {
+                        await loadSubjects();
+                        await loadStats();
+                        updateMarksFilters(); // Refresh marks subject filter
+                    } else {
+                        throw new Error('Failed to delete subject');
+                    }
+                } catch (error) {
+                    console.error('Error deleting subject:', error);
+                    alert('Failed to delete subject.');
+                }
+            }
+        }
+
+        // Load Faculty for Dropdown
+        async function loadFaculty() {
+            try {
+                const response = await fetch(`/api/faculty?deptId=${hodDeptId}`);
+                if (!response.ok) throw new Error('Failed to fetch faculty');
+                faculty = await response.json();
+                const select = document.getElementById('subject-faculty-id');
+                select.innerHTML = '<option value="">Select Faculty</option>';
+                faculty.forEach(fac => {
+                    select.innerHTML += `<option value="${fac.faculty_id}">${fac.faculty_id} - ${fac.full_name}</option>`;
+                });
+            } catch (error) {
+                console.error('Error loading faculty:', error);
+                alert('Failed to load faculty.');
+            }
+        }
+
+        // Load Students
+        async function loadStudents() {
+            try {
+                const response = await fetch(`/api/hod-students?deptId=${hodDeptId}&course=${defaultCourse}`);
+                if (!response.ok) throw new Error('Failed to fetch students');
+                students = await response.json();
+                console.log('Loaded Students:', students);
+                filterStudents();
+            } catch (error) {
+                console.error('Error loading students:', error);
+                alert('Failed to load students.');
+            }
+        }
+
+        // Filter Students
+        function filterStudents() {
+            const semester = document.getElementById('filter-student-semester').value;
+            const tbody = document.getElementById('students-table-body');
+            tbody.innerHTML = '';
+
+            console.log('Filtering Students with semester:', semester);
+            const filtered = students.filter(student => {
+                const matchesDept = student.dept_id === hodDeptId;
+                const matchesCourse = student.course === defaultCourse;
+                const matchesSemester = !semester || student.semester.toString() === semester;
+                console.log(`Student: ${student.roll_number}, Matches Dept: ${matchesDept}, Matches Course: ${matchesCourse}, Matches Semester: ${matchesSemester}`);
+                return matchesDept && matchesCourse && matchesSemester;
+            });
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">No students found.</td></tr>';
+                return;
+            }
+
+            filtered.forEach(student => {
+                const row = `<tr>
+                    <td>${student.roll_number}</td>
+                    <td>${student.full_name}</td>
+                    <td>${student.email}</td>
+                    <td>${student.semester}</td>
+                    <td class="action-buttons">
+                        <button class="btn btn-primary btn-sm" onclick="editStudent('${student.roll_number}')"><i class="fas fa-edit"></i> Edit</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteStudent('${student.roll_number}')"><i class="fas fa-trash"></i> Delete</button>
+                    </td>
+                </tr>`;
+                tbody.innerHTML += row;
+            });
+        }
+
+        // Edit Student
+        function editStudent(rollNumber) {
+            const student = students.find(s => s.roll_number === rollNumber);
+            if (!student) return;
+            document.getElementById('student-modal-title').textContent = 'Edit Student';
+            document.getElementById('student-roll-number').value = student.roll_number;
+            document.getElementById('student-roll-number').setAttribute('readonly', 'readonly');
+            document.getElementById('student-full-name').value = student.full_name;
+            document.getElementById('student-email').value = student.email;
+            document.getElementById('student-password').value = '';
+            document.getElementById('student-semester').value = student.semester;
+            document.getElementById('student-course').value = student.course;
+            document.getElementById('student-dept-id').value = student.dept_id;
+            openModal('student-modal');
+        }
+
+        // Delete Student
+        async function deleteStudent(rollNumber) {
+            if (confirm(`Are you sure you want to delete student ${rollNumber}?`)) {
+                try {
+                    const response = await fetch(`/api/delete-student?roll_number=${rollNumber}`, { method: 'DELETE' });
+                    if (response.ok) {
+                        await loadStudents();
+                        await loadStats();
+                        updateMarksFilters(); // Refresh marks
+                    } else {
+                        throw new Error('Failed to delete student');
+                    }
+                } catch (error) {
+                    console.error('Error deleting student:', error);
+                    alert('Failed to delete student.');
+                }
+            }
+        }
+
+        // Load Subjects for Marks Filter
+        async function loadSubjectsForMarksFilter(semester) {
+            const marksSubjectFilter = document.getElementById('filter-marks-subject');
+            marksSubjectFilter.innerHTML = `<option value="">Select Subject</option>`; // Reset dropdown
+            if (!semester) {
+                console.log('Semester not selected, resetting subject filter.');
+                return;
+            }
+
+            console.log(`Fetching subjects for deptId: ${hodDeptId}, semester: ${semester}, course: ${defaultCourse}`);
+            try {
+                const response = await fetch(`/api/subjects?deptId=${encodeURIComponent(hodDeptId)}&semester=${encodeURIComponent(semester)}&course=${encodeURIComponent(defaultCourse)}`);
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                const data = await response.json();
+                console.log(`Subjects received for deptId ${hodDeptId}, semester ${semester}, course ${defaultCourse}:`, data);
+                if (data.length === 0) {
+                    console.log(`No subjects found for deptId ${hodDeptId}, semester ${semester}, course ${defaultCourse}`);
+                    marksSubjectFilter.innerHTML = `<option value="">No Subjects Available</option>`;
+                    return;
+                }
+                const subjectOptions = data.map(s => `<option value="${s.subject_id}">${s.subject_id} - ${s.subject_name}</option>`).join('');
+                marksSubjectFilter.innerHTML = `<option value="">Select Subject</option>${subjectOptions}`;
+            } catch (error) {
+                console.error('Error loading subjects for marks filter:', error);
+                marksSubjectFilter.innerHTML = `<option value="">Select Subject</option>`;
+                alert('Failed to load subjects for the selected filters. Check the console for details.');
+            }
+        }
+
+        async function updateMarksFilters() {
+    const semester = document.getElementById('filter-marks-semester').value;
+    let subjectId = document.getElementById('filter-marks-subject').value;
+
+    console.log('Updating marks filters:', { semester, subjectId });
+
+    // Load subjects for the selected semester
+    await loadSubjectsForMarksFilter(semester);
+
+    // Reset subject filter if semester changes
+    const lastSemester = document.getElementById('filter-marks-semester').dataset.lastSemester || '';
+    if (lastSemester !== semester) {
+        console.log(`Semester changed - Semester: ${lastSemester} to ${semester}, resetting subject filter.`);
+        document.getElementById('filter-marks-subject').value = '';
+        subjectId = ''; // Reset subjectId to prevent using stale value
+        document.getElementById('filter-marks-semester').dataset.lastSemester = semester;
+    }
+
+    // Load marks with the updated filters
+    await loadMarks(semester, subjectId);
+}
+async function loadMarks(semester = '', subjectId = '') {
+    const tbody = document.getElementById('marks-table-body');
+    tbody.innerHTML = ''; // Clear previous marks
+
+    if (!hodDeptId || !subjectId || !semester) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">Please select all filters to view marks.</td></tr>';
+        console.log('Missing required filters:', { hodDeptId, semester, subjectId });
+        return;
+    }
+
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">Loading...</td></tr>';
+    console.log('Fetching marks with filters:', { deptId: hodDeptId, semester, course: defaultCourse, subjectId });
+
+    const url = `/api/hod-marks?deptId=${encodeURIComponent(hodDeptId)}&semester=${encodeURIComponent(semester)}&course=${encodeURIComponent(defaultCourse)}&subjectId=${encodeURIComponent(subjectId)}`;
+    console.log('API URL:', url);
+
+    try {
+        const [marksResponse, studentsResponse] = await Promise.all([
+            fetch(url).then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}, Message: ${response.statusText}`);
+                }
+                return response.json();
+            }),
+            fetch(`/api/hod-students?deptId=${encodeURIComponent(hodDeptId)}&course=${encodeURIComponent(defaultCourse)}`).then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.json();
+            })
+        ]);
+
+        console.log('Raw Marks Data:', marksResponse);
+        console.log('Raw Students Data:', studentsResponse);
+
+        // Build student lookup
+        const studentMap = {};
+        studentsResponse.forEach(student => {
+            studentMap[student.roll_number] = {
+                full_name: student.full_name,
+                dept_id: student.dept_id,
+                semester: student.semester,
+                course: student.course
+            };
+        });
+        console.log('Student Map:', studentMap);
+
+        // Group marks by roll number
+        const groupedMarks = {};
+        marksResponse.forEach(mark => {
+            if (!mark.roll_number || !mark.subject_id || !mark.assessment_type) {
+                console.warn('Skipping invalid mark entry:', mark);
+                return;
+            }
+            const key = mark.roll_number;
+            if (!groupedMarks[key]) {
+                const student = studentMap[mark.roll_number] || { full_name: 'Unknown', dept_id: 'N/A', semester: 'N/A', course: 'N/A' };
+                groupedMarks[key] = {
+                    roll_number: mark.roll_number,
+                    full_name: student.full_name,
+                    dept_id: student.dept_id,
+                    semester: student.semester,
+                    course: student.course,
+                    subject_name: mark.subject_name || 'N/A',
+                    assessments: {}
+                };
+            }
+            // Normalize assessment type to lowercase for consistency
+            const assessmentType = mark.assessment_type.toLowerCase();
+            groupedMarks[key].assessments[assessmentType] = parseFloat(mark.mark) || 0;
+        });
+
+        const marksArray = Object.values(groupedMarks);
+        console.log('Grouped Marks:', groupedMarks);
+        console.log('Marks Array:', marksArray);
+
+        tbody.innerHTML = '';
+        if (marksArray.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">No marks found for the selected filters.</td></tr>';
+            console.log('No marks data to display after grouping.');
+        } else {
+            marksArray.forEach(mark => {
+                const assignment1 = mark.assessments['assignment 1'] || 0;
+                const assignment2 = mark.assessments['assignment 2'] || 0;
+                const assignment3 = mark.assessments['assignment 3'] || 0;
+                const total = assignment1 + assignment2 + assignment3;
+
+                const row = `<tr>
+                    <td>${mark.roll_number}</td>
+                    <td>${mark.full_name}</td>
+                    <td>${mark.subject_name}</td>
+                    <td>${assignment1}</td>
+                    <td>${assignment2}</td>
+                    <td>${assignment3}</td>
+                    <td>${total}</td>
+                </tr>`;
+                tbody.innerHTML += row;
+            });
+        }
+    } catch (error) {
+        console.error('Error loading marks:', error);
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">Failed to load marks: ' + error.message + '</td></tr>';
+        alert('Failed to load marks. Check the console for details.');
+    }
+}
+function exportMarksToCSV() {
+    const rows = document.querySelectorAll('#marks-table-body tr');
+    if (rows.length === 0 || rows[0].textContent.includes('Please select') || rows[0].textContent.includes('No marks found') || rows[0].textContent.includes('Loading')) {
+        alert('No data to export. Please select filters to view marks.');
+        return;
+    }
+
+    const csv = [];
+    const headers = ['Roll Number', 'Full Name', 'Subject Name', 'Assignment 1', 'Assignment 2', 'Assignment 3', 'Total Marks'];
+    csv.push(headers.join(','));
+
+    rows.forEach(row => {
+        const cells = row.querySelectorAll('td');
+        const rowData = [];
+        cells.forEach(cell => {
+            rowData.push(`"${cell.textContent.replace(/"/g, '""')}"`);
+        });
+        csv.push(rowData.join(','));
+    });
+
+    const csvContent = csv.join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'hod_marks_export.csv';
+    link.click();
+}
+
+        // Load Statistics
+        async function loadStats() {
+            try {
+                const [subjectsData, assignmentsData, studentsData] = await Promise.all([
+                    fetch(`/api/subjects?deptId=${hodDeptId}&course=${defaultCourse}`).then(res => res.json()),
+                    fetch(`/api/faculty-assignments?deptId=${hodDeptId}`).then(res => res.json()),
+                    fetch(`/api/hod-students?deptId=${hodDeptId}&course=${defaultCourse}`).then(res => res.json())
+                ]);
+
+                // Total Subjects
+                document.getElementById('total-subjects').textContent = subjectsData.length;
+
+                // Subjects per Semester
+                const semesterCounts = subjectsData.reduce((acc, subj) => {
+                    acc[subj.semester] = (acc[subj.semester] || 0) + 1;
+                    return acc;
+                }, {});
+                const formattedCounts = Object.entries(semesterCounts)
+                    .map(([sem, count]) => `Sem ${sem}: ${count}`)
+                    .join(', ');
+                document.getElementById('subjects-per-semester').textContent = formattedCounts || 'None';
+
+                // Faculty Assignments
+                document.getElementById('faculty-assignments').textContent = assignmentsData.length;
+
+                // Total Students
+                document.getElementById('total-students').textContent = studentsData.length;
+            } catch (error) {
+                console.error('Error loading stats:', error);
+                alert('Failed to load statistics.');
+            }
+        }
+
+        // Form Submissions
+        document.getElementById('subject-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData);
+            data.deptId = hodDeptId; // Ensure deptId is set
+            data.course = defaultCourse; // Ensure course is set
+            console.log('Submitting subject form with data:', data);
+            const method = document.getElementById('subject-id').hasAttribute('readonly') ? 'PUT' : 'POST';
+            const url = method === 'POST' ? '/api/add-subject' : '/api/update-subject';
+
+            try {
+                const response = await fetch(url, {
+                    method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                if (response.ok) {
+                    console.log('Subject saved successfully');
+                    closeModal('subject-modal');
+                    await loadSubjects();
+                    await loadStats();
+                    updateMarksFilters(); // Refresh marks subject filter
+                } else {
+                    const errorData = await response.json();
+                    throw new Error(`Failed to save subject: ${errorData.error || 'Unknown error'}`);
+                }
+            } catch (error) {
+                console.error('Error saving subject:', error);
+                alert(`Failed to save subject: ${error.message}`);
+            }
+        });
+
+        document.getElementById('student-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData);
+            data.deptId = hodDeptId; // Ensure deptId is set
+            data.course = defaultCourse; // Ensure course is set
+            console.log('Submitting student form with data:', data);
+            const method = document.getElementById('student-roll-number').hasAttribute('readonly') ? 'PUT' : 'POST';
+            const url = method === 'POST' ? '/api/add-student' : '/api/update-student';
+
+            try {
+                const response = await fetch(url, {
+                    method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                if (response.ok) {
+                    console.log('Student saved successfully');
+                    closeModal('student-modal');
+                    await loadStudents();
+                    await loadStats();
+                    updateMarksFilters(); // Refresh marks
+                } else {
+                    const errorData = await response.json();
+                    throw new Error(`Failed to save student: ${errorData.error || 'Unknown error'}`);
+                }
+            } catch (error) {
+                console.error('Error saving student:', error);
+                alert(`Failed to save student: ${error.message}`);
+            }
+        });
+
+        // Initialize Dashboard
+        document.addEventListener('DOMContentLoaded', () => {
+            loadHODDetails();
+        });
+    </script>
+</body>
+</html>
